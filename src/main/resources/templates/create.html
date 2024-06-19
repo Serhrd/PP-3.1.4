@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New user</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            display: flex;
+            flex-direction: column; /* Элементы идут один за другим вертикально */
+            align-items: center; /* Центрирование элементов по горизонтали */
+            justify-content: center; /* Центрирование элементов по вертикали */
+            height: 70vh; /* Высота контейнера равна высоте вьюпорта */
+            padding: 3px;
+            background-color: white;
+        }
+
+        .green-button {
+            background-color: #4CAF50; /* Зелёный цвет фона */
+            color: white; /* Белый цвет текста */
+            padding: 10px; /* Внутренние отступы */
+            border: none; /* Без границы */
+            border-radius: 5px; /* Скругление углов */
+            cursor: pointer; /* Вид курсора указывает на кликабельность */
+            font-size: 16px; /* Размер шрифта */
+        }
+
+        /* Дополнительные стили для красивой кнопки при наведении */
+        .green-button:hover {
+            background-color: darkgreen;
+            font-weight: bold;
+        }
+
+        input {
+            width: 250px; /* Установить желаемую ширину */
+            height: 29px; /* Установить желаемую высоту */
+            border-radius: 5px; /* Установить радиус скругления углов */
+            border: 2px solid #ccc; /* Обычный цвет границы */
+
+            transition: border-color 0.3s; /* Плавное изменение цвета границы */
+            outline: none; /* Убирает стандартную рамку при фокусе */
+
+        }
+
+
+        label, input {
+            margin: 2px; /* Отступ для лейблов и инпутов */
+            display: block; /* Элементы блочные, каждый начинается с новой строки */
+            align-content: center;
+        }
+
+        /* Редактирование стиля для checkbox */
+        .role-title {
+            align-items: center;
+            text-align: center;
+        }
+        .checkboxes {
+
+            display: grid;
+            justify-items: center;
+            align-content: center;
+            text-align: center;
+
+        }
+
+    </style>
+</head>
+<body>
+<h1>Add user</h1>
+<form action="#" method="POST" th:action="@{/admin/new}" th:object="${user}">
+    <div class="form-container">
+        <label for="name">First name</label>
+        <input type="text" th:field="*{name}" id="name" required/>
+
+
+        <label for="lastname">Last name</label>
+        <input type="text" th:field="*{lastName}" id="lastname"/>
+
+        <label for="username">Email</label>
+        <input type="text" th:field="*{username}" id="username" required/>
+
+
+        <label for="password">Password</label>
+        <input type="text" th:field="*{password}" id="password" required/>
+
+
+        <div class="role-selection">
+            <div class="role-title">Role</div>
+            <div class="checkboxes">
+                <div th:each="role : ${allRoles}" class="checkbox-container">
+                    <input type="checkbox"
+                           th:name="ids"
+                           th:value="${role.roleId}"
+                           th:id="${'role'+role.roleId}"/>
+                    <label th:for="${'role'+role.roleId}" th:text="${role.roleName}"></label>
+                </div>
+            </div>
+        </div>
+        <button class="green-button" type="submit">add new user</button>
+    </div>
+</form>
+<br/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <title>All users</title>
+    <style>
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            background-color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody + tbody {
+            border-top: 2px solid #dee2e6;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .table-hover tbody tr:hover {
+            color: #212529;
+            background-color: rgba(0, 0, 0, 0.055);
+        }
+
+        .table-striped tbody tr:nth-last-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .table-striped tbody tr:nth-last-of-type(even) {
+            background-color: #ffff;
+        }
+
+        /* modal window size*/
+        .modal-dialog {
+            margin-top: 10px;
+        }
+
+        .custom-modal-body {
+            max-height: 100vh;
+        }
+
+        /* Стилизация кнопок */
+        .btn-primary {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 10px;
+        }
+
+        .btn-danger {
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="form">
+    <h3>All users</h3>
+    <table class="table table-striped table-borderless">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}">id</td>
+            <td th:text="${user.name}">Name</td>
+            <td th:text="${user.lastName}">Surname</td>
+            <td th:text="${user.username}">Username</td>
+            <td class="text-break">
+                <th:block th:each="role : ${user.roles}"
+                          th:text="${role.roleName.replace('ROLE_', ' ')}">Role
+                </th:block>
+            </td>
+            <td>
+                <!-- Ссылка для открытия модального окна редактирования -->
+                <button type="button" class="btn btn-primary editUserModal" th:data-user-id="${user.id}">
+                    Edit
+                </button>
+            </td>
+            <td>
+                <!-- Ссылка для удаления пользователя -->
+                <button type="button" class="btn btn-danger delete-button" th:data-user-id="${user.id}">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br>
+<!-- Modal for edit user -->
+<div class="modal fade" id="confirmEditUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Форма редактирования пользователя -->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveButton">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal window Bootstrap for delete conformation -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header style-for-heading">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Delete user</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body custom-modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger " id="confirmDeleteButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+
+    $(document).ready(function () {
+        // Обработчик для открытия модального окна редактирования
+        $('.editUserModal').click(function () {
+
+            const id = $(this).data('user-id');
+            // Installing id for a modal window and the confirm button
+            $('#confirmSaveButton').off('click').on('click', function () {
+
+                saveUser() //call for delete method
+            })
+            $.ajax({
+                url: 'admin/edit/' + id,
+                type: 'GET',
+                success: function (data) {
+                    $('#confirmEditUserModal .modal-body').html(data); // insert response into the modal window body
+                    $('#confirmEditUserModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error for loading the page", error);
+                }
+            });
+        });
+
+        function saveUser() {
+
+            var formData = $('#confirmEditUserModal .modal-body form').serialize(); //Serializing data form
+
+            $.ajax({
+                url: '/admin/save',// URL for update user
+                type: 'PATCH',
+                data: formData,
+                success: function (response) {
+                    console.log('Success', response);
+                    $('#confirmEditUserModal').modal('hide'); // Closing the modal window
+                    location.reload(); // reload page
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error:', error);
+                    alert('Exception the user has not been saved');
+                }
+            });
+        }
+    });
+
+    $(document).ready(function () {
+
+        // Handler for delete buttons into a table
+        $('.delete-button').click(function () {
+            const id = $(this).data('user-id');
+            // Installing a click handler for confirm delete button
+            $('#confirmDeleteButton').off('click').on('click', function () {
+                deleteUser(id) //call for delete method
+            })
+            // Installing id for a modal window and the confirm button
+            $.ajax({
+                url: 'admin/form/' + id,
+                type: 'GET',
+                success: function (response) {
+                    $('#confirmDeleteModal .modal-body').html(response); // insert response into the modal window body
+                    $('#confirmDeleteModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error for loading the page", error);
+                }
+            });
+        });
+
+        function deleteUser(id) {
+            // Handler for the delete conformation button in the modal window
+            console.log('Deleting user with ID:', id); // Debugging logg
+
+            $.ajax({
+                url: 'admin/delete/' + id, // URL for delete user
+                type: 'DELETE',
+                success: function () {
+                    location.reload(); // reload page
+                    $('#confirmDeleteModal').modal('hide'); // Closing the modal window
+                },
+                error: function (xhr, status, error) {
+                    alert('The user has not been deleted');
+                }
+            });
+        }
+    });
+
+</script>
+
+</body>
+</html>

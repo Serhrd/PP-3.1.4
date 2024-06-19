@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+    .custom-grey-background {
+        display: flex;
+        height: 40px;
+        background-color: #333;
+        color: white;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .user-info {
+        padding-left: 30px; /* Исправлено с padding на padding-left для корректного отображения */
+        font-size: 20px; /* Изменено с 25px для улучшения читаемости */
+    }
+
+    .username {
+        font-weight: bold;
+        font-size: 20px; /* Изменено с 25px для улучшения читаемости */
+    }
+
+    .logout-button {
+        padding-right: 20px;
+        color: darkgray;
+    }
+
+    .container-fluid {
+        display: flex;
+        flex-direction: row; /* Оставляем направление оси горизонтальным */
+        min-height: 100vh;
+    }
+
+    .small-block {
+        flex: 1; /* Используем более простое соотношение */
+        background-color: white;
+        margin: 5px; /* внещние отступы small-block*/
+        color: #007bff;
+    }
+
+    .big-block {
+        flex: 6; /* Используем более простое соотношение */
+        padding: 20px;
+        background-color: whitesmoke;
+        margin: 0px;
+    }
+
+    .btn-text {
+        background-color: white;
+        color: white; /* Bootstrap primary color */
+
+    }
+
+    .btn-text:hover,
+    .btn-text:focus {
+        color: white;
+        text-decoration: underline;
+        background-color: #007bff;
+    }
+
+
+</style>
+<body>
+<div class="custom-grey-background">
+    <div class="user-info">
+        <span class="username" th:text="${user.username}">Email</span>
+        <span th:text="${' with roles: '}"> with roles: </span>
+        <span th:each="role : ${user.roles}"
+              th:text="${role.roleName.replace('ROLE_', '') + (roleStat.last ? '' : ', ')}">RoleName</span>
+    </div>
+    <div>
+        <a class="logout-button" th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="small-block">
+        <a class="btn btn-text btn-block" onclick="toggleButtonState(this, 'admin')" id="adminButton"
+           th:href="@{admin/users}"
+           th:classappend="${'hasRole(''ROLE_ADMIN'')'} ? 'active' :''">Admin</a>
+        <a class="btn btn-text-primary btn-block" onclick="toggleButtonState(this, 'user')" id="userButton"
+           th:href="@{/user/form}"
+           th:classappend="${'hasRole(''ROLE_USER'')'} ? 'active' : ''">User</a>
+    </div>
+    <div class="big-block" id="bigBlock">
+        <h1>Admin panel</h1>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="userTable" th:href="@{/admin/users}" data-target="#BigBlockContent">Users
+                    table</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" id="newUser" th:href="@{/admin/new}" data-target="#BigBlockContent">New
+                    User</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="BigBlockContent">
+            <div class="tab-pane fade show active" id="userTableContent" role="tabpanel"
+                 aria-labelledby="userTable-tab"></div>
+            <div class="tab-pane fade show active" id="newUserContent" role="tabpanel"
+                 aria-labelledby="newUser-tab"></div>
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Устанавливаем активное состояние для 'Admin' и 'User table'
+        $('#adminButton').addClass('btn-primary').removeClass('btn-text');
+        $('#userTable').addClass('active');
+
+        // Делает страницу admin стартовой
+        loadContent('admin/users', '#userTableContent');
+
+        //Функция для AJAX загрузки содержимого
+        function loadContent(url, target) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    // Помещаем ответ сервера в блок .big-block
+                    $(target).html(response);
+                },
+                error: function () {
+                    alert('Error loading content');
+                }
+            });
+        }
+
+        // Перехватываем клики по ссылкам в .small-block
+        $('.small-block a').on('click', function (e) {
+            e.preventDefault(); // Предотвращаем стандартное действие ссылки
+            var href = $(this).attr('href'); // Получаем атрибут href ссылки
+            var targetId = $(this).data('target'); // Получаем ID цели куда будет загружаться содержимое
+            var target = targetId ? targetId : '#BigBlockContent'; // Если data-target не установлен, используем #BigBlockContent по умолчанию
+            loadContent(href, target); // Загружаем содержимое
+            // Обновляем активные состояния кнопок
+            $('.small-block a').removeClass('btn-primary').addClass('btn-text');
+            $(this).addClass('btn-primary').removeClass('btn-text');
+        });
+
+        // Перехватываем клики по вкладкам
+        $('.nav-tabs a').on('click', function (e) {
+            e.preventDefault(); // Предотвращаем стандартное действие ссылки
+            $('.nav-tabs a').removeClass('active'); // Убираем активный класс со всех вкладок
+            $(this).addClass('active'); // Добавляем активный класс к текущей вкладке
+            var href = $(this).attr('href'); // Получаем атрибут href ссылки
+            var target = $(this).data('target'); // Получаем цель из data-target атрибута
+            loadContent(href, target); // Загружаем содержимое
+        });
+    });
+
+    function toggleButtonState(clickedButton) {
+        // Получаем обе кнопки
+        var userButton = document.getElementById('userButton');
+        var adminButton = document.getElementById('adminButton');
+
+        // Сброс состояний обеих кнопок
+        userButton.classList.remove('btn-primary');
+        userButton.classList.add('btn-text');
+        adminButton.classList.remove('btn-primary');
+        adminButton.classList.add('btn-text');
+
+        // Активируем кнопку, которая была нажата
+        clickedButton.classList.remove('btn-text');
+        clickedButton.classList.add('btn-primary');
+    }
+</script>
+</body>
+</html>
