@@ -65,19 +65,11 @@
 
         <label for="username">Email</label>
         <input type="text" th:field="*{username}" id="username" required/>
-
-        <div class="role-selection">
-            <div class="role-title">Role</div>
-            <div class="checkboxes">
-                <div th:each="role : ${allRoles}" class="checkbox-container">
-                    <input type="checkbox"
-                           th:name="ids"
-                           th:value="${role.roleId}"
-                           th:id="${'role'+role.roleId}"/>
-                    <label th:for="${'role'+role.roleId}" th:text="${role.roleName}"></label>
-                </div>
-            </div>
-        </div>
+        <label for="username">Password</label>
+        <input type="text" th:field="*{password}" id="password" required/>
+        <select multiple class="form-control" id="EditRoleSelect" name="roles" size="2"  >
+            <option th:each="role : ${allRoles}" th:value="${role.roleId}" th:text="${role.getRoleName()}"/>
+        </select>
     </div>
 </form>
 <br/>

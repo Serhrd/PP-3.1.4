@@ -21,7 +21,7 @@ public class Role implements GrantedAuthority {
     private String roleName;
 
     @Transient
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "roles")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "roles")
     private Set<User> userSet = new HashSet<>();
 
     public Role() {

@@ -83,8 +83,8 @@ public class AdminController {
 
     @PatchMapping(value = "/save")
     public ResponseEntity<?> update(@ModelAttribute("user") User user,
-                                    @RequestParam List<Long> ids) {
-        Set<Role> role = rs.findAllRoleId(ids);
+                                    @RequestParam(name = "roles") Long []ids) {
+        Set<Role> role = rs.findAllRoleId(List.of(ids));
         user.setRoles(role);
         us.updateUser(user);
         return ResponseEntity.ok().build();
