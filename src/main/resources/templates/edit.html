@@ -68,7 +68,8 @@
         <label for="username">Password</label>
         <input type="text" th:field="*{password}" id="password" required/>
         <select multiple class="form-control" id="EditRoleSelect" name="roles" size="2"  >
-            <option th:each="role : ${allRoles}" th:value="${role.roleId}" th:text="${role.getRoleName()}"/>
+            <option th:each="role : ${allRoles}" th:value="${role.roleId}" th:selected="${user.roles.contains(role)}"
+                     th:text="${role.getRoleName()}"/>
         </select>
     </div>
 </form>
